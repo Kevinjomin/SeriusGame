@@ -7,8 +7,17 @@ public class RoadManager : MonoBehaviour
     public PlacementManager placementManager;
 
     public List<Vector3Int> temporaryPlacementPositions = new List<Vector3Int>();
+    public List<Vector3Int> roadPositionsToReCheck = new List<Vector3Int>();
 
-    public GameObject roadStraight;
+    private Vector3Int startPosition;
+    private bool placementMode = false;
+
+    public RoadFixer roadFixer;
+
+    private void Start()
+    {
+        roadFixer = GetComponent<RoadFixer>();
+    }
 
     public void PlaceRoad(Vector3Int position)
     {
@@ -16,7 +25,68 @@ public class RoadManager : MonoBehaviour
             return;
         if(placementManager.CheckIfPositionIsFree(position) == false)       
             return;
-        placementManager.PlaceTemporaryStructure(position, roadStraight, CellType.Road);
+        if(placementMode == false)
+        {
+            temporaryPlacementPositions.Clear();
+            roadPositionsToReCheck.Clear();
+
+            placementMode = true;
+            startPosition = position;
+
+            temporaryPlacementPositions.Add(position);
+            placementManager.PlaceTemporaryStructure(position, roadFixer.deadEnd, CellType.Road);
+            FixRoadPrefabs();
+        }
+        else
+        {
+            placementManager.RemoveAllTemporaryStructures();
+            temporaryPlacementPositions.Clear();
+            foreach (var positionToFix in roadPositionsToReCheck)
+            {
+                roadFixer.FixRoadAtPosition(placementManager, positionToFix);
+            }
+            roadPositionsToReCheck.Clear();
+
+            temporaryPlacementPositions = placementManager.GetPathBetween(startPosition, position);
+            foreach (var temporaryPosition in temporaryPlacementPositions)
+            {
+                if (placementManager.CheckIfPositionIsFree(temporaryPosition) == false)
+                    continue;
+                placementManager.PlaceTemporaryStructure(temporaryPosition, roadFixer.deadEnd, CellType.Road);
+            }
+        }
+        FixRoadPrefabs();
+    }
+
+    private void FixRoadPrefabs()
+    {
+        foreach (var temporaryPosition in temporaryPlacementPositions)
+        {
+            roadFixer.FixRoadAtPosition(placementManager, temporaryPosition);
+            var neighbours = placementManager.GetNeighboursOfTypeFor(temporaryPosition, CellType.Road);
+            foreach (var roadposition in neighbours)
+            {
+                if(roadPositionsToReCheck.Contains(roadposition) == false)
+                {
+                    roadPositionsToReCheck.Add(roadposition);
+                }
+            }
+        }
+        foreach (var positionToFix in roadPositionsToReCheck)
+        {
+            roadFixer.FixRoadAtPosition(placementManager, positionToFix);
+        }
+    }
+    public void FinishPlacingRoad()
+    {
+        placementMode = false;
+        placementManager.AddtemporaryStructuresToStructureDictionary(); 
+        if (temporaryPlacementPositions.Count > 0)
+        {
+            // AudioPlayer.instance.PlayPlacementSound();
+        }
+        temporaryPlacementPositions.Clear();
+        startPosition = Vector3Int.zero;    
     }
 //     public PlacementManager placementManager;
 //     // public AudioPlayer audioPlayer;
@@ -99,3 +169,4 @@ public class RoadManager : MonoBehaviour
 //         startPosition = Vector3Int.zero;
 //     }
 }
+
