@@ -18,10 +18,10 @@ public class GameManager : MonoBehaviour
     {
         uiController.OnRoadPlacement += RoadPlacementHandler;
         uiController.OnHousePlacement += HousePlacementHandler;
-        uiController.OnPabrikPlacement += PabrikPlacemnetHandler;
+        uiController.OnPabrikPlacement += PabrikPlacementHandler;
     }
 
-    private void PabrikPlacemnetHandler()
+    private void PabrikPlacementHandler()
     {
         ClearInputActions();
         inputManager.OnMouseClick += structureManager.PlacePabrik;
@@ -44,9 +44,9 @@ public class GameManager : MonoBehaviour
 
     private void ClearInputActions()
     {
-        inputManager.OnMouseClick += null;
-        inputManager.OnMouseHold += null;
-        inputManager.OnMouseUp += null;
+        inputManager.OnMouseClick = null;
+        inputManager.OnMouseHold = null;
+        inputManager.OnMouseUp = null;
     }
 
     private void Update()

@@ -7,14 +7,14 @@ using UnityEngine;
 
 public class StructureManager : MonoBehaviour
 {
-    public StructurePrefabWeighted[] housesPrefabe, PabrikPrefabs;
+    public StructurePrefabWeighted[] housesPrefabs, PabrikPrefabs;
     public PlacementManager placementManager;
 
     private float[] houseWeights, pabrikWeights;
 
     private void Start()
     {
-        houseWeights = housesPrefabe.Select(prefabStats => prefabStats.weight).ToArray();
+        houseWeights = housesPrefabs.Select(prefabStats => prefabStats.weight).ToArray();
         pabrikWeights = PabrikPrefabs.Select(prefabStats => prefabStats.weight).ToArray();
     }
 
@@ -23,7 +23,7 @@ public class StructureManager : MonoBehaviour
         if (CheckPositionBeforePlacement(position))
         {
             int randomIndex = GetRandomWeightedIndex(houseWeights);
-            placementManager.PlaceObjectOnTheMap(position, housesPrefabe[randomIndex].prefab, CellType.Structure);
+            placementManager.PlaceObjectOnTheMap(position, housesPrefabs[randomIndex].prefab, CellType.Structure);
             // AudioPlayer.instance.PlayPlacementSound();
         }
     }
