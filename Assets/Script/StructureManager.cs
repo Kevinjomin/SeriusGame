@@ -20,21 +20,37 @@ public class StructureManager : MonoBehaviour
 
     public void PlaceHouse(Vector3Int position)
     {
+        int price = StatsManager.Instance.housePrice;
+        if (StatsManager.Instance.coin < price)
+        {
+            Debug.Log("Need " + price + " coins!");
+            return;
+        }
         if (CheckPositionBeforePlacement(position))
         {
             int randomIndex = GetRandomWeightedIndex(houseWeights);
             placementManager.PlaceObjectOnTheMap(position, housesPrefabs[randomIndex].prefab, CellType.Structure);
             // AudioPlayer.instance.PlayPlacementSound();
+
+            StatsManager.Instance.PlacedHouse();
         }
     }
 
     public void PlacePabrik(Vector3Int position)
     {
+        int price = StatsManager.Instance.pabrikPrice;
+        if(StatsManager.Instance.coin < price)
+        {
+            Debug.Log("Need " + price + " coins!");
+            return;
+        }
         if (CheckPositionBeforePlacement(position))
         {
             int randomIndex = GetRandomWeightedIndex(pabrikWeights);
             placementManager.PlaceObjectOnTheMap(position, PabrikPrefabs[randomIndex].prefab, CellType.Structure);
             // AudioPlayer.instance.PlayPlacementSound();
+
+            StatsManager.Instance.PlacedPabrik();
         }
     }
 
