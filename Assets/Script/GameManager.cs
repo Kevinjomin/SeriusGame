@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
         uiController.OnRoadPlacement += RoadPlacementHandler;
         uiController.OnHousePlacement += HousePlacementHandler;
         uiController.OnPabrikPlacement += PabrikPlacementHandler;
+        uiController.OnTreesPlacement += TreesPlacementHandler;
     }
 
     private void PabrikPlacementHandler()
@@ -40,6 +41,12 @@ public class GameManager : MonoBehaviour
         inputManager.OnMouseClick += roadManager.PlaceRoad;
         inputManager.OnMouseHold += roadManager.PlaceRoad;
         inputManager.OnMouseUp += roadManager.FinishPlacingRoad;
+    }
+
+    private void TreesPlacementHandler()
+    {
+        ClearInputActions();
+        inputManager.OnMouseClick += structureManager.PlaceTrees;
     }
 
     private void ClearInputActions()

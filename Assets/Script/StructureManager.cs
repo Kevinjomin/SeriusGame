@@ -7,15 +7,16 @@ using UnityEngine;
 
 public class StructureManager : MonoBehaviour
 {
-    public StructurePrefabWeighted[] housesPrefabs, PabrikPrefabs;
+    public StructurePrefabWeighted[] housesPrefabs, PabrikPrefabs, treesPrefabs;
     public PlacementManager placementManager;
 
-    private float[] houseWeights, pabrikWeights;
+    private float[] houseWeights, pabrikWeights, treesWeights;
 
     private void Start()
     {
         houseWeights = housesPrefabs.Select(prefabStats => prefabStats.weight).ToArray();
         pabrikWeights = PabrikPrefabs.Select(prefabStats => prefabStats.weight).ToArray();
+        treesWeights = treesPrefabs.Select(prefabStats => prefabStats.weight).ToArray();
     }
 
     public void PlaceHouse(Vector3Int position)
@@ -23,6 +24,7 @@ public class StructureManager : MonoBehaviour
         int price = StatsManager.Instance.housePrice;
         if (StatsManager.Instance.coin < price)
         {
+            NotificationHandler.Instance.SendNotification("Need " + price + " coins!");
             Debug.Log("Need " + price + " coins!");
             return;
         }
@@ -41,6 +43,7 @@ public class StructureManager : MonoBehaviour
         int price = StatsManager.Instance.pabrikPrice;
         if(StatsManager.Instance.coin < price)
         {
+            NotificationHandler.Instance.SendNotification("Need " + price + " coins!");
             Debug.Log("Need " + price + " coins!");
             return;
         }
@@ -51,6 +54,25 @@ public class StructureManager : MonoBehaviour
             // AudioPlayer.instance.PlayPlacementSound();
 
             StatsManager.Instance.PlacedPabrik();
+        }
+    }
+
+    public void PlaceTrees(Vector3Int position)
+    {
+        int price = StatsManager.Instance.treesPrice;
+        if (StatsManager.Instance.coin < price)
+        {
+            NotificationHandler.Instance.SendNotification("Need " + price + " coins!");
+            Debug.Log("Need " + price + " coins!");
+            return;
+        }
+        if (CheckTreePosition(position))
+        {
+            int randomIndex = GetRandomWeightedIndex(treesWeights);
+            placementManager.PlaceObjectOnTheMap(position, treesPrefabs[randomIndex].prefab, CellType.Structure);
+            // AudioPlayer.instance.PlayPlacementSound();
+
+            StatsManager.Instance.PlacedTrees();
         }
     }
 
@@ -79,17 +101,37 @@ public class StructureManager : MonoBehaviour
     {                                                                   
         if (placementManager.CheckIfPositionInBound(position)== false)
         {
+            NotificationHandler.Instance.SendNotification("This Position is out of bounds");
             Debug.Log("This Position is out of bounds");
             return false;
         }
         if (placementManager.CheckIfPositionIsFree(position)== false)
         {
+            NotificationHandler.Instance.SendNotification("This Position is not empty");
             Debug.Log("This position is not empty");
             return false;
         }
         if (placementManager.GetNeighboursOfTypeFor(position,CellType.Road).Count <= 0)
         {
+            NotificationHandler.Instance.SendNotification("Must be placed near a road");
             Debug.Log("Must be placed near a road");
+            return false;
+        }
+        return true;
+    }
+
+    private bool CheckTreePosition(Vector3Int position)
+    {
+        if (placementManager.CheckIfPositionInBound(position) == false)
+        {
+            NotificationHandler.Instance.SendNotification("This Position is out of bounds");
+            Debug.Log("This Position is out of bounds");
+            return false;
+        }
+        if (placementManager.CheckIfPositionIsFree(position) == false)
+        {
+            NotificationHandler.Instance.SendNotification("This position is not empty");
+            Debug.Log("This position is not empty");
             return false;
         }
         return true;

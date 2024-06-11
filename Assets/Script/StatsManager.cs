@@ -85,7 +85,7 @@ public class StatsManager : MonoBehaviour
     {
         coin -= treesPrice;
         coinChange -= 30;
-        polutionChange -= 10;
+        polutionChange -= 6;
 
         UpdateUI();
     }
