@@ -11,4 +11,5 @@ public class StatsUI : MonoBehaviour
     public TMP_Text coin;
     public TMP_Text population;
     public TMP_Text polution;
+    public TMP_Text objectivesStart, objectivesSide;
 }

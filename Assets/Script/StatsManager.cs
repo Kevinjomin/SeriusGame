@@ -11,24 +11,34 @@ public class StatsManager : MonoBehaviour
 
     [SerializeField] private StatsUI statsUI;
 
-    private float tick = 3f;
+    public float tick { get; private set; } = 3f;
 
     [HideInInspector] public int day = 1;
     [HideInInspector] public int hour = 0;
 
+    [Header("Current stats")]
     public int coin;
     public int population;
     public int maxPopulation;
     public int polution;
     public int maxPolution = 100;
 
+    [Header("Stat changes")]
     public int populationChange = 2;
     public int coinChange;
     public int polutionChange;
 
+    [Header("Structure prices")]
     public int housePrice = 1000;
     public int pabrikPrice = 3000;
     public int treesPrice = 2000;
+
+    [Header("Objectives")]
+    public int dayLimit;
+    public float polutionPercentageLimit = 100f;
+    public int coinGoal;
+    public int populationGoal;
+    [HideInInspector] public bool objectiveComplete = false;
 
     private void Awake()
     {
@@ -45,6 +55,8 @@ public class StatsManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        statsUI.objectivesStart.text = DisplayObjectiveText();
+        statsUI.objectivesSide.text = DisplayObjectiveText();
         StartCoroutine(TimeTick());
     }
 
@@ -57,6 +69,8 @@ public class StatsManager : MonoBehaviour
         coin += coinChange;
 
         UpdateUI();
+
+        CheckObjectiveCompletion();
 
         yield return new WaitForSeconds(tick);
 
@@ -90,6 +104,27 @@ public class StatsManager : MonoBehaviour
         UpdateUI();
     }
 
+    private void CheckObjectiveCompletion()
+    {
+        if(CalculatePolutionPercentage() >= polutionPercentageLimit)
+        {
+            NotificationHandler.Instance.SendNotification("Polution reached the limit");
+            objectiveComplete = false;
+            StateManager.Instance.ChangeState(StateManager.GameState.end);
+        }
+        if(coin >= coinGoal && population >= populationGoal)
+        {
+            UnityEngine.Debug.Log("Objective completed");
+            objectiveComplete = true;
+            StateManager.Instance.ChangeState(StateManager.GameState.end);
+        }
+        if(day > dayLimit)
+        {
+            NotificationHandler.Instance.SendNotification("Reached maximum days");
+            objectiveComplete = false;
+            StateManager.Instance.ChangeState(StateManager.GameState.end);
+        }
+    }
 
     private void UpdateDate()
     {
@@ -127,5 +162,15 @@ public class StatsManager : MonoBehaviour
     {
         float result = ((float)polution / (float)maxPolution) * 100;
         return Mathf.Min(result, 100);
+    }
+
+    private string DisplayObjectiveText()
+    {
+        string text = "Objective:\n" +
+                      "- Reach " + populationGoal + " population\n" +
+                      "- Obtain " + coinGoal + " coins\n" +
+                      "- Keep pollution level below " + polutionPercentageLimit + "%\n" +
+                      "- Time limit: " + dayLimit + " days";
+        return text;
     }
 }
