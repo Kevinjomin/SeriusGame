@@ -34,6 +34,26 @@ public class StateManager : MonoBehaviour
         ChangeState(GameState.start);
     }
 
+    private void Update()
+    {
+        CheckResumeInput();
+    }
+
+    private void CheckResumeInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (gameState == GameState.ingame)
+            {
+                PauseButton();
+            }
+            else if (gameState == GameState.paused)
+            {
+                ResumeButton();
+            }
+        }
+    }
+
     public void ChangeState(GameState state)
     {
         gameState = state;
